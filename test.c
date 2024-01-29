@@ -4,3 +4,11 @@
 [#] 
 e alo bidibao77 
 dugi cjelobroj
+
+//joooo
+
+/|
+whats
+been
+up
+|/
