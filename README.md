@@ -1,2 +1,2 @@
 # EB-C-Compiler
-Making full compiler from zero for C programming language
+Making a compiler for C programming language in C.
