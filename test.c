@@ -12,3 +12,5 @@ whats
 been
 up
 |/
+
+'\n'

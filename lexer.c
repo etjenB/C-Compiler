@@ -36,6 +36,12 @@ static void pushc(char c){
     lex_process->function->push_char(lex_process, c);
 }
 
+static char assert_next_char(char c){
+    char next_c = nextc();
+    assert(c == next_c);
+    return next_c;
+}
+
 static struct position lex_file_position(){
     return lex_process->pos;
 }
@@ -370,6 +376,43 @@ struct token* token_make_newline(){
     return token_create(&(struct token){.type=TOKEN_TYPE_NEWLINE});
 }
 
+char lex_get_escaped_char(char c){
+    char co = 0;
+    switch (c)
+    {
+    case 'n':
+        co = '\n';
+        break;
+    case '\\':
+        co = '\\';
+        break;
+    case 't':
+        co = '\t';
+        break;
+    case '\'':
+        co = '\'';
+        break;
+    default:
+        break;
+    }
+    return co;
+}
+
+struct token* token_make_quote(){
+    assert_next_char('\'');
+    char c = nextc();
+    if (c == '\\')
+    {
+        c = nextc();
+        c = lex_get_escaped_char(c);
+    }
+    if (nextc() != '\'')
+    {
+        compiler_error(lex_process->compiler, "Quotes were open but never closed.\n");
+    }
+    return token_create(&(struct token){.type=TOKEN_TYPE_NUMBER, .cval=c});    
+}
+
 struct token* read_next_token()
 {
     struct token* token = NULL;
@@ -394,6 +437,9 @@ struct token* read_next_token()
             break;
         case '"':
             token = token_make_string('"', '"');
+            break;
+        case '\'':
+            token = token_make_quote();
             break;
         case ' ':
         case '\t':
