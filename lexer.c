@@ -228,6 +228,40 @@ bool lex_is_in_expression(){
     return lex_process->current_expression_count > 0;
 }
 
+bool is_keyword(const char* str){
+    return S_EQ(str, "bezpredznakni") ||
+            S_EQ(str, "spredznakni") ||
+            S_EQ(str, "karakter") ||
+            S_EQ(str, "kratki") ||
+            S_EQ(str, "cjelobroj") ||
+            S_EQ(str, "dugi") ||
+            S_EQ(str, "decim") ||
+            S_EQ(str, "duplodecim") ||
+            S_EQ(str, "nista") ||
+            S_EQ(str, "struktura") ||
+            S_EQ(str, "unija") ||
+            S_EQ(str, "staticno") ||
+            S_EQ(str, "__ignorisi_provjerutipa") ||
+            S_EQ(str, "vrati") ||
+            S_EQ(str, "ukljucuje") ||
+            S_EQ(str, "velicina") ||
+            S_EQ(str, "ako") ||
+            S_EQ(str, "inace") ||
+            S_EQ(str, "dok") ||
+            S_EQ(str, "za") ||
+            S_EQ(str, "uradi") ||
+            S_EQ(str, "prekini") ||
+            S_EQ(str, "nastavi") ||
+            S_EQ(str, "izbor") ||
+            S_EQ(str, "slucaj") ||
+            S_EQ(str, "zadano") ||
+            S_EQ(str, "idina") ||
+            S_EQ(str, "deftipa") ||
+            S_EQ(str, "konstanta") ||
+            S_EQ(str, "vanjski") ||
+            S_EQ(str, "ogranici");
+}
+
 static struct token* token_make_operator_or_string(){
     char op = peekc();
     if (op == '<')
@@ -264,8 +298,11 @@ static struct token* token_make_identifier_or_keyword(){
 
     buffer_write(buffer, 0x00);
 
-    //TODO: check if this is a keyword
-
+    //check if this is a keyword
+    if (is_keyword(buffer_ptr(buffer)))
+    {
+        return token_create(&(struct token){.type=TOKEN_TYPE_KEYWORD,.sval=buffer_ptr(buffer)});
+    }
 
     return token_create(&(struct token){.type=TOKEN_TYPE_IDENTIFIER,.sval=buffer_ptr(buffer)});
 }
