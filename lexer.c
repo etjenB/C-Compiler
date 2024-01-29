@@ -3,6 +3,7 @@
 #include "helpers/buffer.h"
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 
 #define LEX_GETC_IF(buffer, c, exp)     \
     for (c = peekc(); exp; c = peekc()) \
@@ -248,12 +249,34 @@ static struct token* token_make_operator_or_string(){
 
 static struct token* token_make_symbol(){
     char c = nextc();
-    if (c == ')' || c == ']')
+    if (c == ')')
     {
         lex_finish_expression();
     }
     struct token* token = token_create(&(struct token){.type=TOKEN_TYPE_SYMBOL,.cval=c});
     return token;
+}
+
+static struct token* token_make_identifier_or_keyword(){
+    struct buffer* buffer = buffer_create();
+    char c = 0;
+    LEX_GETC_IF(buffer, c, (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || (c == '_'));
+
+    buffer_write(buffer, 0x00);
+
+    //TODO: check if this is a keyword
+
+
+    return token_create(&(struct token){.type=TOKEN_TYPE_IDENTIFIER,.sval=buffer_ptr(buffer)});
+}
+
+struct token* read_special_token(){
+    char c = peekc();
+    if (isalpha(c) || c == '_')
+    {
+        return token_make_identifier_or_keyword();
+    }
+    return NULL;
 }
 
 struct token* read_next_token()
@@ -283,7 +306,11 @@ struct token* read_next_token()
             break;
         
         default:
-            compiler_error(lex_process->compiler, "Unexpected token.\n");
+            token = read_special_token();
+            if (!token)
+            {
+                compiler_error(lex_process->compiler, "Unexpected token.\n");
+            }
     }
     return token;
 };
